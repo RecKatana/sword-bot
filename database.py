@@ -14,6 +14,7 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         tg_id INTEGER UNIQUE,
         name TEXT,
+        username TEXT,
         gender TEXT,
         age INTEGER,
         level INTEGER DEFAULT 1,
@@ -126,7 +127,7 @@ def get_user(tg_id):
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT name, level, exp, hp, max_hp, attack, defense, energy, max_energy, silver
+    SELECT name, username, level, exp, hp, max_hp, attack, defense, energy, max_energy, silver
     FROM users 
     WHERE tg_id=?
     """, (tg_id,))
@@ -137,14 +138,14 @@ def get_user(tg_id):
 
 
 # === Создать пользователя ===
-def create_user(tg_id, name):
+def create_user(tg_id, name, username):
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-    INSERT INTO users (tg_id, name, gender, age)
-    VALUES (?, ?, ?, ?)
-    """, (tg_id, name, "Не указан", 18))
+    INSERT INTO users (tg_id, name, username, gender, age)
+    VALUES (?, ?, ?, ?, ?)
+    """, (tg_id, name, username, "Не указан", 18))
 
     conn.commit()
     conn.close()
