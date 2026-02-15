@@ -49,8 +49,66 @@ def init_db():
     )
     """)
 
+def send_friend_request(from_user, to_user):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO friend_requests (from_user, to_user) VALUES (?, ?)",
+        (from_user, to_user)
+    )
     conn.commit()
     conn.close()
+
+
+def get_friend_request(from_user, to_user):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT * FROM friend_requests WHERE from_user = ? AND to_user = ?",
+        (from_user, to_user)
+    )
+    request = cursor.fetchone()
+    conn.close()
+    return request
+
+
+def delete_friend_request(from_user, to_user):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "DELETE FROM friend_requests WHERE from_user = ? AND to_user = ?",
+        (from_user, to_user)
+    )
+    conn.commit()
+    conn.close()
+
+def add_friend(user1, user2):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO friends (user1, user2) VALUES (?, ?)",
+        (user1, user2)
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_friends(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT users.*
+    FROM friends
+    JOIN users ON users.tg_id = friends.user1 OR users.tg_id = friends.user2
+    WHERE (friends.user1 = ? OR friends.user2 = ?)
+    AND users.tg_id != ?
+    """, (user_id, user_id, user_id))
+
+    friends = cursor.fetchall()
+    conn.close()
+    return friends
+   
 
 # === Получить пользователя ===
 def get_user(tg_id):
