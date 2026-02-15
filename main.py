@@ -3,6 +3,7 @@ import telebot
 from flask import Flask
 from threading import Thread
 from database import init_db, get_user, create_user
+from database import send_friend_request, accept_friend_request, get_friends
 
 # === Токен ===
 TOKEN = os.getenv("BOT_TOKEN")
