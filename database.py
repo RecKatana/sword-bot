@@ -30,11 +30,32 @@ def init_db():
         rating INTEGER DEFAULT 0,
         hidden INTEGER DEFAULT 0
     )
+    """
+                  )
+    
+)
+    """)
+
+    # ===== Таблица заявок в друзья =====
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS friend_requests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        from_user INTEGER,
+        to_user INTEGER
+    )
+    """)
+
+    # ===== Таблица друзей =====
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS friends (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user1 INTEGER,
+        user2 INTEGER
+    )
     """)
 
     conn.commit()
     conn.close()
-
 
 # === Получить пользователя ===
 def get_user(tg_id):
