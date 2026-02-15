@@ -64,6 +64,45 @@ def profile(message):
 )
 
     bot.send_message(message.chat.id, text)
+
+@bot.message_handler(commands=["принять"])
+def accept_ally(message):
+    args = message.text.split()
+    
+    if len(args) < 2:
+        bot.send_message(message.chat.id, "Используй: /принять @username")
+        return
+
+    username = args[1].replace("@", "")
+    target = get_user_by_username(username)
+
+    if not target:
+        bot.send_message(message.chat.id, "Игрок не найден ❌")
+        return
+
+    if target[1] == message.from_user.id:
+    bot.send_message(message.chat.id, "Ты не можешь заключить союз с самим собой 🤨")
+    return
+
+    request = get_friend_request(target[1], message.from_user.id)
+
+    if not request:
+        bot.send_message(message.chat.id, "Заявки нет ❌")
+        return
+
+    delete_friend_request(target[1], message.from_user.id)
+    add_friend(target[1], message.from_user.id)
+
+    text = (
+        "🌌 Воздух сгущается...\n\n"
+        "✨ Между вами вспыхивает древний круг союза...\n"
+        "🔮 Руны загораются алым светом...\n\n"
+        "⚔ Клятва произнесена.\n"
+        "🤝 Союз скреплён силой стали!\n\n"
+        f"🔥 Теперь @{username} — твой союзник!"
+    )
+
+    bot.send_message(message.chat.id, text)
     
 # === Запуск бота ===
 def run_bot():
