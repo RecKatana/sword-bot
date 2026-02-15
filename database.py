@@ -30,12 +30,7 @@ def init_db():
         rating INTEGER DEFAULT 0,
         hidden INTEGER DEFAULT 0
     )
-    """
-                  )
-    
-)
     """)
-
     # ===== Таблица заявок в друзья =====
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS friend_requests (
