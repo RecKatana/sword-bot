@@ -110,18 +110,17 @@ def get_friends(user_id):
     return friends
    
 
-# === Получить пользователя ===
 def get_user(tg_id):
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT name, level, exp, hp, max_hp, silver
+    SELECT name, level, exp, hp, max_hp, attack, defense, energy, max_energy, silver
     FROM users 
     WHERE tg_id=?
     """, (tg_id,))
-    user = cursor.fetchone()
 
+    user = cursor.fetchone()
     conn.close()
     return user
 
