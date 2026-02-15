@@ -1,7 +1,9 @@
 import sqlite3
 
+
 def get_connection():
     return sqlite3.connect("game.db")
+
 
 def init_db():
     conn = get_connection()
@@ -29,6 +31,47 @@ def init_db():
         hidden INTEGER DEFAULT 0
     )
     """)
+
+    conn.commit()
+    conn.close()
+
+
+# === Получить пользователя ===
+def get_user(tg_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM users WHERE tg_id=?", (tg_id,))
+    user = cursor.fetchone()
+
+    conn.close()
+    return user
+
+
+# === Создать пользователя ===
+def create_user(tg_id, name):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    INSERT INTO users (tg_id, name, gender, age)
+    VALUES (?, ?, ?, ?)
+    """, (tg_id, name, "Не указан", 18))
+
+    conn.commit()
+    conn.close()
+
+
+# === Обновить серебро ===
+def update_silver(tg_id, amount):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    UPDATE users
+    SET silver = silver + ?
+    WHERE tg_id = ?
+    """, (amount, tg_id))
 
     conn.commit()
     conn.close()
