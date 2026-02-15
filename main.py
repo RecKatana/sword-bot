@@ -44,7 +44,16 @@ def profile(message):
         bot.send_message(message.chat.id, "Ты ещё не зарегистрирован. Напиши /start")
         return
 
-    bot.send_message(message.chat.id, f"DEBUG:\n{user}")
+    text = (
+        f"🧙 Персонаж: {user[0]}\n"
+        f"⚔ Уровень: {user[1]}\n"
+        f"✨ Опыт: {user[2]}\n"
+        f"❤️ HP: {user[3]}/100\n"
+        f"🔋 Энергия: {user[4]}/100\n"
+        f"💰 Серебро: {user[5]}"
+    )
+
+    bot.send_message(message.chat.id, text)
     
 # === Запуск бота ===
 def run_bot():
