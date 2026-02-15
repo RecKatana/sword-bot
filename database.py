@@ -41,7 +41,11 @@ def get_user(tg_id):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM users WHERE tg_id=?", (tg_id,))
+    cursor.execute("""
+    SELECT name, level, exp, hp, max_hp, silver
+    FROM users 
+    WHERE tg_id=?
+    """, (tg_id,))
     user = cursor.fetchone()
 
     conn.close()
