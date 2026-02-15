@@ -5,7 +5,7 @@ def get_connection():
     return sqlite3.connect("game.db")
 
 
-def init_db() он:
+def init_db():
     conn = get_connection()
     cursor = conn.cursor()
 
