@@ -24,8 +24,7 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     return "Bot is running!"
-
-# === Команда /start ===
+    
 @bot.message_handler(commands=["start"])
 def start(message):
     user = get_user(message.from_user.id)
@@ -33,7 +32,16 @@ def start(message):
     if user:
         bot.send_message(message.chat.id, "Ты уже зарегистрирован ⚔")
     else:
-        create_user(message.from_user.id, message.from_user.first_name)
+        username = message.from_user.username
+        if username is None:
+            username = f"id{message.from_user.id}"
+
+        create_user(
+            message.from_user.id,
+            message.from_user.first_name,
+            username
+        )
+
         bot.send_message(message.chat.id, "Персонаж создан ⚔🔥")
 
 @bot.message_handler(commands=["profile"])
