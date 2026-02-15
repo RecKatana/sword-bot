@@ -36,7 +36,6 @@ def start(message):
         create_user(message.from_user.id, message.from_user.first_name)
         bot.send_message(message.chat.id, "Персонаж создан ⚔🔥")
 
-# === Команда /profile ===
 @bot.message_handler(commands=["profile"])
 def profile(message):
     user = get_user(message.from_user.id)
@@ -45,18 +44,7 @@ def profile(message):
         bot.send_message(message.chat.id, "Ты ещё не зарегистрирован. Напиши /start")
         return
 
-    text = (
-    f"🧙 Персонаж: {user[2]}\n"
-    f"⚔ Уровень: {user[5]}\n"
-    f"✨ Опыт: {user[6]}\n"
-    f"❤️ HP: {user[7]}/{user[8]}\n"
-    f"🔋 Энергия: {user[11]}/{user[12]}\n"
-    f"🗡 Атака: {user[9]}\n"
-    f"🛡 Защита: {user[10]}\n"
-    f"💰 Серебро: {user[13]}"
-    )
-
-    bot.send_message(message.chat.id, text)
+    bot.send_message(message.chat.id, f"DEBUG:\n{user}")
     
 # === Запуск бота ===
 def run_bot():
