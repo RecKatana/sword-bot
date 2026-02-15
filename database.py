@@ -31,6 +31,16 @@ def init_db():
         hidden INTEGER DEFAULT 0
     )
     """)
+
+    # === Добавляем колонку username если её нет ===
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN username TEXT")
+    except:
+        pass
+
+    conn.commit()
+    conn.close()
+    
     # ===== Таблица заявок в друзья =====
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS friend_requests (
