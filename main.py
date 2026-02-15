@@ -75,8 +75,8 @@ def send_alliance(message):
 
     # --- 1. Если ответ на сообщение ---
     if message.reply_to_message:
-    target_id = message.reply_to_message.from_user.id
-    target = get_user(target_id)
+        target_id = message.reply_to_message.from_user.id
+        target = get_user(target_id)
 
     if not target:
         bot.send_message(message.chat.id, "Игрок не зарегистрирован ❌")
