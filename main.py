@@ -29,6 +29,27 @@ def start(message):
         create_user(message.from_user.id, message.from_user.first_name)
         bot.send_message(message.chat.id, "Персонаж создан ⚔🔥")
 
+# === Команда /profile ===
+@bot.message_handler(commands=["profile"])
+def profile(message):
+    user = get_user(message.from_user.id)
+
+    if not user:
+        bot.send_message(message.chat.id, "Ты ещё не зарегистрирован. Напиши /start")
+        return
+
+    text = (
+        f"🧙 Персонаж: {user[1]}\n"
+        f"⚔ Уровень: {user[2]}\n"
+        f"❤️ HP: {user[3]}\n"
+        f"🔋 Энергия: {user[4]}\n"
+        f"🗡 Атака: {user[5]}\n"
+        f"🛡 Защита: {user[6]}\n"
+        f"💰 Серебро: {user[7]}"
+    )
+
+    bot.send_message(message.chat.id, text)
+    
 # === Запуск бота ===
 def run_bot():
     bot.infinity_polling()
