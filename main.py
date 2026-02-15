@@ -70,25 +70,32 @@ def profile(message):
 def send_alliance(message):
     args = message.text.split()
     target = None
-    target_id = None
-    username = None
 
     # --- 1. Если ответ на сообщение ---
     if message.reply_to_message:
         target_id = message.reply_to_message.from_user.id
-        target = get_user(target_id)
+        target = get_user(target_id)  # возвращает объект User
+        if not target:
+            bot.send_message(message.chat.id, "Игрок не найден ❌")
+            return
+        target_id = target.id
 
-# --- 2. Если через @username ---
-    elif len(args) >= 2:
-        username = args[1].replace("@", "")
-        target = get_user_by_username(username)
+    # --- 2. Если через @username ---
+    elif len(args) >= 2 and args[1].startswith("@"):
+        username = args[1][1:]  # убираем @
+        target = get_user_by_username(username)  # возвращает объект User
+        if not target:
+            bot.send_message(message.chat.id, "Игрок не найден ❌")
+            return
+        target_id = target.id
 
-    if not target:
-        bot.send_message(message.chat.id, "Игрок не найден ❌")
+    else:
+        bot.send_message(message.chat.id, "Укажите пользователя ❌")
         return
 
-    target_id = target[0]
-
+    # Тут дальше твоя логика для союза
+    bot.send_message(message.chat.id, f"Союз с игроком {target.username} ✅")
+    
 # --- Иначе ошибка ---
 else:
     bot.send_message(message.chat.id, "Используй: /союз @username или ответь на сообщение")
