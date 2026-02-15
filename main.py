@@ -73,8 +73,8 @@ def send_alliance(message):
     target_id = None
     username = None
 
-    # --- 1. Если ответ на сообщение ---
-    if message.reply_to_message:
+# --- 1. Если ответ на сообщение ---
+if message.reply_to_message:
     target_id = message.reply_to_message.from_user.id
     target = get_user(target_id)
 
@@ -82,26 +82,21 @@ def send_alliance(message):
         bot.send_message(message.chat.id, "Игрок не зарегистрирован ❌")
         return
 
-        target = get_user(target_id)
+# --- 2. Если через @username ---
+elif len(args) >= 2:
+    username = args[1].replace("@", "")
+    target = get_user_by_username(username)
 
-        if not target:
-            bot.send_message(message.chat.id, "Игрок не зарегистрирован ❌")
-            return
-
-    # --- 2. Если через @username ---
-    elif len(args) >= 2:
-        username = args[1].replace("@", "")
-        target = get_user_by_username(username)
-
-        if not target:
-            bot.send_message(message.chat.id, "Игрок не найден ❌")
-            return
-
-        target_id = target[0]  # если tg_id первый
-
-    else:
-        bot.send_message(message.chat.id, "Используй: /союз @username или ответь на сообщение игрока")
+    if not target:
+        bot.send_message(message.chat.id, "Игрок не найден ❌")
         return
+
+    target_id = target[0]
+
+# --- Иначе ошибка ---
+else:
+    bot.send_message(message.chat.id, "Используй: /союз @username или ответь на сообщение")
+    return
 
     # Нельзя с собой
     if target_id == message.from_user.id:
