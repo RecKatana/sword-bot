@@ -21,28 +21,13 @@ def home():
 # === Команда /start ===
 @bot.message_handler(commands=["start"])
 def start(message):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM users WHERE tg_id=?", (message.from_user.id,))
-    user = cursor.fetchone()
+    user = get_user(message.from_user.id)
 
     if user:
         bot.send_message(message.chat.id, "Ты уже зарегистрирован ⚔")
     else:
-        cursor.execute("""
-        INSERT INTO users (tg_id, name, gender, age)
-        VALUES (?, ?, ?, ?)
-        """, (
-            message.from_user.id,
-            message.from_user.first_name,
-            "Не указан",
-            18
-        ))
-        conn.commit()
+        create_user(message.from_user.id, message.from_user.first_name)
         bot.send_message(message.chat.id, "Персонаж создан ⚔🔥")
-
-    conn.close()
 
 # === Запуск бота ===
 def run_bot():
