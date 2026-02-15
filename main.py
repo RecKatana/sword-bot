@@ -2,9 +2,12 @@ import os
 import telebot
 from flask import Flask
 from threading import Thread
+from database import init_db
 
 TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(TOKEN)
+
+init_db()
 
 app = Flask(__name__)
 
