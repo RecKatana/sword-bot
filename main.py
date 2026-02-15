@@ -46,24 +46,30 @@ def start(message):
 
         bot.send_message(message.chat.id, "Персонаж создан ⚔🔥")
 
-@bot.message_handler(commands=["profile"])
-def profile(message):
-    user = get_user(message.from_user.id)
+@bot.message_handler(commands=["профиль"])
+def профиль(message):
+    user_id = message.from_user.id
+    user = get_user(user_id)  # Получаем объект User
 
     if not user:
         bot.send_message(message.chat.id, "Ты ещё не зарегистрирован. Напиши /start")
         return
 
+    # Получаем союзников, если есть
+    allies = alliances.get(user_id, set())
+
+    # Формируем текст профиля
     text = (
-    f"👤 Персонаж: {user[0]}\n"
-    f"📈 Уровень: {user[1]}\n"
-    f"✨ Опыт: {user[2]}\n"
-    f"❤️ HP: {user[3]}/{user[4]}\n"
-    f"🔋 Энергия: {user[7]}/{user[8]}\n"
-    f"⚔ Атака: {user[5]}\n"
-    f"🛡 Защита: {user[6]}\n"
-    f"💰 Серебро: {user[9]}"
-)
+        f"👤 Персонаж: {user.username}\n"
+        f"📈 Уровень: {user.level}\n"
+        f"✨ Опыт: {getattr(user, 'exp', 0)}\n"   # если есть опыт, иначе 0
+        f"❤️ HP: {getattr(user, 'hp', 100)}/{getattr(user, 'max_hp', 100)}\n"
+        f"🔋 Энергия: {getattr(user, 'energy', 50)}/{getattr(user, 'max_energy', 50)}\n"
+        f"⚔ Атака: {getattr(user, 'attack', 10)}\n"
+        f"🛡 Защита: {getattr(user, 'defense', 5)}\n"
+        f"💰 Серебро: {getattr(user, 'silver', 0)}\n"
+        f"🛡 Союзников: {len(allies)}"
+    )
 
     bot.send_message(message.chat.id, text)
 
