@@ -78,14 +78,10 @@ def send_alliance(message):
         target_id = message.reply_to_message.from_user.id
         target = get_user(target_id)
 
-    if not target:
-        bot.send_message(message.chat.id, "Игрок не зарегистрирован ❌")
-        return
-
 # --- 2. Если через @username ---
-elif len(args) >= 2:
-    username = args[1].replace("@", "")
-    target = get_user_by_username(username)
+    elif len(args) >= 2:
+        username = args[1].replace("@", "")
+        target = get_user_by_username(username)
 
     if not target:
         bot.send_message(message.chat.id, "Игрок не найден ❌")
