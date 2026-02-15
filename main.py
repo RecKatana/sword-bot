@@ -24,5 +24,5 @@ def index():
 
 if __name__ == "__main__":
     bot.remove_webhook()
-    bot.set_webhook(url=f"https://ТВОЙ-САЙТ.onrender.com/{TOKEN}")
+    bot.set_webhook(url=f"https://sword-bot.onrender.com/{TOKEN}")
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
