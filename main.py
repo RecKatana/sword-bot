@@ -3,6 +3,7 @@ import telebot
 from flask import Flask
 from threading import Thread
 from database import init_db, get_user, create_user
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from database import (
     send_friend_request,
     get_friend_request,
@@ -65,45 +66,222 @@ def profile(message):
 
     bot.send_message(message.chat.id, text)
 
-@bot.message_handler(commands=["принять"])
-def accept_ally(message):
+@bot.message_handler(commands=["союз"])
+def send_alliance(message):
     args = message.text.split()
-    
-    if len(args) < 2:
-        bot.send_message(message.chat.id, "Используй: /принять @username")
+    target = None
+    target_id = None
+    username = None
+
+    # --- 1. Если ответ на сообщение ---
+    if message.reply_to_message:
+        target_id = message.reply_to_message.from_user.id
+        username = message.reply_to_message.from_user.username
+
+        if not username:
+            bot.send_message(message.chat.id, "У игрока нет username ❌")
+            return
+
+        target = get_user(target_id)
+
+        if not target:
+            bot.send_message(message.chat.id, "Игрок не зарегистрирован ❌")
+            return
+
+    # --- 2. Если через @username ---
+    elif len(args) >= 2:
+        username = args[1].replace("@", "")
+        target = get_user_by_username(username)
+
+        if not target:
+            bot.send_message(message.chat.id, "Игрок не найден ❌")
+            return
+
+        target_id = target[1]
+
+    else:
+        bot.send_message(message.chat.id, "Используй: /союз @username или ответь на сообщение игрока")
         return
 
-    username = args[1].replace("@", "")
-    target = get_user_by_username(username)
-
-    if not target:
-        bot.send_message(message.chat.id, "Игрок не найден ❌")
+    # Нельзя с собой
+    if target_id == message.from_user.id:
+        bot.send_message(message.chat.id, "Нельзя заключить союз с самим собой 😅")
         return
 
-    if target[1] == message.from_user.id:
-    bot.send_message(message.chat.id, "Ты не можешь заключить союз с самим собой 🤨")
-    return
+    # Уже союз?
+    friends = get_friends(message.from_user.id)
+    for friend in friends:
+        if friend[1] == target_id:
+            bot.send_message(message.chat.id, "Вы уже союзники ⚔")
+            return
 
-    request = get_friend_request(target[1], message.from_user.id)
+    # Встречная заявка?
+    reverse_request = get_friend_request(target_id, message.from_user.id)
 
-    if not request:
-        bot.send_message(message.chat.id, "Заявки нет ❌")
+    if reverse_request:
+        delete_friend_request(target_id, message.from_user.id)
+        add_friend(target_id, message.from_user.id)
+
+        text = (
+            "🌪 Воздух сгущается...\n\n"
+            "✨ Две силы притянулись друг к другу...\n"
+            "🔮 Круг союза вспыхивает ярким светом...\n\n"
+            f"🤝 Теперь @{username} — твой союзник!"
+        )
+
+        bot.send_message(message.chat.id, text)
+        bot.send_message(target_id, text)
         return
 
-    delete_friend_request(target[1], message.from_user.id)
-    add_friend(target[1], message.from_user.id)
+    # Уже отправлял заявку?
+    existing = get_friend_request(message.from_user.id, target_id)
+    if existing:
+        bot.send_message(message.chat.id, "Ты уже отправил предложение союза 📩")
+        return
 
-    text = (
-        "🌌 Воздух сгущается...\n\n"
-        "✨ Между вами вспыхивает древний круг союза...\n"
-        "🔮 Руны загораются алым светом...\n\n"
-        "⚔ Клятва произнесена.\n"
-        "🤝 Союз скреплён силой стали!\n\n"
-        f"🔥 Теперь @{username} — твой союзник!"
+    # Отправляем заявку
+    send_friend_request(message.from_user.id, target_id)
+
+    sender_username = message.from_user.username or f"id{message.from_user.id}"
+
+    bot.send_message(
+        message.chat.id,
+        f"🕊 Ты предложил союз @{username}!"
     )
 
-    bot.send_message(message.chat.id, text)
-    
+    bot.send_message(
+        target_id,
+        f"⚔ Игрок @{sender_username} предлагает тебе союз!\n\n"
+        f"Ответь на его сообщение и напиши:\n"
+        f"/союз"
+        )
+
+@bot.message_handler(commands=["мои_союзы"])
+def my_alliances(message):
+    friends = get_friends(message.from_user.id)
+
+    if not friends:
+        bot.send_message(message.chat.id, "⚔ У тебя пока нет союзников.")
+        return
+
+    markup = InlineKeyboardMarkup()
+
+    for friend in friends:
+        friend_id = friend[1]  # tg_id союзника
+        user = get_user(friend_id)
+
+        if user:
+            # ⚠ ВАЖНО: если username — последний столбец
+            username = user[-1]
+
+            if username:
+                text = f"⚔ @{username}"
+            else:
+                text = f"⚔ Игрок {friend_id}"
+        else:
+            text = f"⚔ Игрок {friend_id}"
+
+        markup.add(
+            InlineKeyboardButton(
+                text=text,
+                callback_data=f"ally_{friend_id}"
+            )
+        )
+
+    bot.send_message(
+        message.chat.id,
+        "🤝 Твои союзы:\n\nВыбери союзника:",
+        reply_markup=markup
+    )
+
+@bot.message_handler(commands=["мои_союзы"])
+def my_alliances(message):
+    friends = get_friends(message.from_user.id)
+
+    if not friends:
+        bot.send_message(message.chat.id, "⚔ У тебя пока нет союзников.")
+        return
+
+    markup = InlineKeyboardMarkup()
+
+    for friend in friends:
+        friend_id = friend[1]
+        user = get_user(friend_id)
+
+        if user and user[-1]:
+            username = user[-1]
+            text = f"⚔ @{username}"
+        else:
+            text = f"⚔ Игрок {friend_id}"
+
+        markup.add(
+            InlineKeyboardButton(
+                text=text,
+                callback_data=f"allymenu_{friend_id}"
+            )
+        )
+
+    bot.send_message(
+        message.chat.id,
+        "🤝 Твои союзы:\n\nВыбери союзника:",
+        reply_markup=markup
+    )
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("ally_"))
+def alliance_menu(call):
+    friend_id = int(call.data.split("_")[1])
+    user = get_user(friend_id)
+
+    if user and user[-1]:
+        username = user[-1]
+        name_text = f"@{username}"
+    else:
+        name_text = f"Игрок {friend_id}"
+
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton(
+            text="❌ Разорвать союз",
+            callback_data=f"break_{friend_id}"
+        )
+    )
+
+    bot.edit_message_text(
+        f"⚔ Союз с {name_text}\n\nЧто хочешь сделать?",
+        call.message.chat.id,
+        call.message.message_id,
+        reply_markup=markup
+    )
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("break_"))
+def break_alliance(call):
+    friend_id = int(call.data.split("_")[1])
+    user_id = call.from_user.id
+
+    # Удаляем союз у обоих
+    remove_friend(user_id, friend_id)
+    remove_friend(friend_id, user_id)
+
+    text = (
+        "💔 Круг союза трескается...\n"
+        "🌫 Магия рассеивается...\n\n"
+        "⚔ Союз разорван."
+    )
+
+    bot.edit_message_text(
+        text,
+        call.message.chat.id,
+        call.message.message_id
+    )
+
+    try:
+        bot.send_message(
+            friend_id,
+            "💔 Один из союзов был разорван..."
+        )
+    except:
+        pass
+
 # === Запуск бота ===
 def run_bot():
     bot.infinity_polling()
