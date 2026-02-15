@@ -71,19 +71,17 @@ def send_alliance(message):
     args = message.text.split()
     target = None
 
-    # --- 1. Если ответ на сообщение ---
     if message.reply_to_message:
         target_id = message.reply_to_message.from_user.id
-        target = get_user(target_id)  # возвращает объект User
+        target = get_user(target_id)
         if not target:
             bot.send_message(message.chat.id, "Игрок не найден ❌")
             return
         target_id = target.id
 
-    # --- 2. Если через @username ---
     elif len(args) >= 2 and args[1].startswith("@"):
-        username = args[1][1:]  # убираем @
-        target = get_user_by_username(username)  # возвращает объект User
+        username = args[1][1:]
+        target = get_user_by_username(username)
         if not target:
             bot.send_message(message.chat.id, "Игрок не найден ❌")
             return
@@ -93,7 +91,6 @@ def send_alliance(message):
         bot.send_message(message.chat.id, "Укажите пользователя ❌")
         return
 
-    # Тут дальше твоя логика для союза
     bot.send_message(message.chat.id, f"Союз с игроком {target.username} ✅")
     
 # --- Иначе ошибка ---
