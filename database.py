@@ -5,7 +5,7 @@ def get_connection():
     return sqlite3.connect("game.db")
 
 
-def init_db():
+def init_db() он:
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -32,14 +32,12 @@ def init_db():
     )
     """)
 
+
     # === Добавляем колонку username если её нет ===
     try:
         cursor.execute("ALTER TABLE users ADD COLUMN username TEXT")
     except:
         pass
-
-    conn.commit()
-    conn.close()
     
     # ===== Таблица заявок в друзья =====
     cursor.execute("""
@@ -58,6 +56,9 @@ def init_db():
         user2 INTEGER
     )
     """)
+
+conn.commit()
+    conn.close()
 
 def send_friend_request(from_user, to_user):
     conn = get_connection()
