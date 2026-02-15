@@ -58,7 +58,7 @@ def init_db():
     """)
 
 conn.commit()
-    conn.close()
+conn.close()
 
 def send_friend_request(from_user, to_user):
     conn = get_connection()
